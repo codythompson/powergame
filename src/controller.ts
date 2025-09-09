@@ -1,3 +1,3 @@
 export class Controller {
-  nodes: { node: Node }[];
+  nodes: { node: Node }[] = [];
 }
