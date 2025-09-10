@@ -1,12 +1,10 @@
-// import { GraphicsContext } from "pixi.js";
-import { Graphics } from "pixi.js";
+import { GraphicsContext } from "pixi.js";
 
-// export default function makeNodeGraphic(w: number, h: number): GraphicsContext {
-//   const gc = new GraphicsContext().rect(0, 0, w, h);
-export default function makeNodeGraphic(w: number, h: number): Graphics {
-  let gc = new Graphics();
-  gc = gc.rect(0, 0, w, h).fill({
-    color: "#903000",
-  });
-  return gc;
-}
+const w = 64;
+const h = 64;
+let nodeContext = new GraphicsContext();
+nodeContext = nodeContext.rect(0, 0, w, h).fill({
+  color: "#ffffff",
+});
+
+export default nodeContext;
