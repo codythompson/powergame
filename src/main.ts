@@ -1,5 +1,8 @@
 import { Application, Assets, BitmapText, Sprite } from "pixi.js";
 
+import "./assets";
+import makeNodeGraphic from "./graphics/node";
+
 (async () => {
   // Create a new application
   const app = new Application();
@@ -24,6 +27,11 @@ import { Application, Assets, BitmapText, Sprite } from "pixi.js";
 
   // // Add the bunny to the stage
   app.stage.addChild(bunny);
+
+  const nodeGraphic = makeNodeGraphic(64, 268);
+  nodeGraphic.x = 96;
+  nodeGraphic.y = 64;
+  app.stage.addChild(nodeGraphic);
 
   const tmpText = new BitmapText({
     text: "oy! drld! ya tear m8?",
