@@ -1,5 +1,5 @@
 import { Container, Sprite } from "pixi.js";
-import { Model, ModelCollection, ModelType, ModelTypeString } from "./models";
+import { Model, ModelCollection, ModelType, ModelTypeString } from "./models.old";
 import { isDef } from "./types/guards";
 
 export type PixiView = Container|Sprite;

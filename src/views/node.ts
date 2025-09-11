@@ -1,5 +1,5 @@
 import { Graphics } from "pixi.js";
-import { ifConnected, Node, SlotNames } from "../models"
+import { ifConnected, Node, SlotNames } from "../models.old"
 import { ViewMaker } from "../view"
 import nodeContext from "../graphics/node";
 

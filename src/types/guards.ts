@@ -1,4 +1,4 @@
-import { NullNotAllowedError } from "./errors"
+import { NullNotAllowedError, UnexpectedUndefinedError } from "./errors"
 
 export type Prim = string|number|boolean
 export type Simple = undefined|Prim|Simple[]|{[ix:string]:Simple}
@@ -21,6 +21,13 @@ export function assertNotNull<T>(value:T|null):value is T {
     throw new NullNotAllowedError() // TODO message
   }
   return true
+}
+
+export function assertDef<T extends Prim|object>(value:T|null|undefined, message?:string):T {
+  if (!isDef(value)) {
+    throw new UnexpectedUndefinedError(message);
+  }
+  return value
 }
 
 export function isDef<T>(value:T|undefined|null):value is T {

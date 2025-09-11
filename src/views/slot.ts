@@ -1,4 +1,4 @@
-import { Slot } from "../models";
+import { Slot } from "../models.old";
 import { PixiView, ViewMaker } from "../view";
 
 const slotMaker:ViewMaker<Slot> = (model, parent):PixiView => {
