@@ -1,8 +1,17 @@
-import { Node } from "../models"
-import { View, ViewFactory } from "../view";
+import { Graphics } from "pixi.js";
+import { ifConnected, Node, SlotNames } from "../models"
+import { ViewMaker } from "../view"
+import nodeContext from "../graphics/node";
 
-export class NodeViewFactory implements ViewFactory<Node> {
-  create(model: Node): View<Node> {
-    throw new Error("Method not implemented.");
-  }
+const nodeMaker:ViewMaker<Node> = (model, parent) => {
+  const newNode = new Graphics(nodeContext);
+  newNode.x = model.x;
+  newNode.y = model.y;
+  newNode.tint = 0x333011;
+
+  ifConnected(SlotNames.in, model, slot => parent.push(slot));
+
+  return newNode
 }
+
+export default nodeMaker;

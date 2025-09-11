@@ -20,3 +20,6 @@ export function isTyped<C extends Typed<T>, T extends string>(value:any, type:T)
 //     return (value:string):value is K => enumerate(enumish).indexOf(value as K) >= 0
 // }
 // export type EnumishK<E extends Enumish<string>, K extends keyof E> = E[K]
+
+export type Tracked<T extends object> = T & { id:number };
+// export type UnTracked<T extends object> = T & { id:undefined }

@@ -12,15 +12,18 @@ export interface View {
 
 export class ViewCollection {
   private readonly _views: View[] = []
-  private readonly _makers: { [K in ModelTypeString]?: ViewMaker<ModelType<K>> } = {}
   private readonly _models:ModelCollection = new ModelCollection()
 
-  constructor(readonly container:Container) {}
+  constructor(readonly container:Container, readonly makers: { [K in ModelTypeString]?: ViewMaker<ModelType<K>> }) {}
 
   push(model:Model<ModelTypeString>):number {
+    const existing = this.getViewFor(model);
+    if (isDef(existing)) {
+      throw new Error(`[ViewCollection.push] model with id ${model.id} name:${model.name} - already pushed!`);
+    }
     const viewId = this._views.length;
     const modelId = this._models.push(model);
-    const pixiView = this.getMaker(model.type)(this, model as ModelType<typeof model.type>);
+    const pixiView = this.getMaker(model.type)(model as ModelType<typeof model.type>, this);
     this._views.push({
       id: viewId,
       model: modelId,
@@ -31,14 +34,21 @@ export class ViewCollection {
   }
 
   getMaker<T extends ModelTypeString>(type:T):ViewMaker<ModelType<T>> {
-    const maker = this._makers[type]
+    const maker = this.makers[type]
     if (!isDef(maker)) {
       throw new Error(`[ViewCollection] no maker found for model type ${type}`);
     }
     return maker as ViewMaker<ModelType<T>>
   }
+
+  getViewFor(model:Model<ModelTypeString>):View|undefined {
+    if (!isDef(model.id) || !this._models.has(model)) {
+      return undefined;
+    }
+    return this._views.find(v => v.model === model.id)
+  }
 }
 
 
-export type ViewMaker<M extends Model<ModelTypeString>> = (parent: ViewCollection, model:M) => PixiView;
+export type ViewMaker<M extends Model<ModelTypeString>> = (model:M, parent: ViewCollection) => PixiView;
 

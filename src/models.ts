@@ -1,5 +1,5 @@
 import { isDef } from "./types/guards";
-import { isTyped, Typed } from "./types/typed";
+import { isTyped, Tracked, Typed } from "./types/typed";
 
 export const SlotType = "Slot"
 export type SlotType = typeof SlotType
@@ -11,7 +11,7 @@ export type BufferType = typeof BufferType
 export type ModelTypeString = SlotType|NodeType|BufferType
 
 export interface Model<T extends ModelTypeString> extends Typed<T> {
-  id: number
+  id?: number
   name?: string
 }
 
@@ -19,15 +19,39 @@ export interface Rated<T extends ModelTypeString> extends Model<T> {
   rate: number;
 }
 
-export interface Slot extends Rated<SlotType> {
+export interface Slot<N extends SlotNames = SlotNames> extends Rated<SlotType> {
   connection: Node|undefined
+  name: N
+}
+export type ConnectedSlot<N extends SlotNames = SlotNames> = Slot<N> & { connection: Node };
+export enum SlotNames {
+  out = "out",
+  in = "in",
 }
 
-export interface Node extends Rated<NodeType> {
+export function ifSlot<N extends SlotNames>(named:N, node:Node, then:(slot:Slot<N>)=>void) {
+  const slot = node.slots.find(s => s.name === named)
+  if (isDef(slot)) {
+    then(slot as Slot<N>);
+  }
+}
+export function ifConnected<N extends SlotNames>(named:N, node:Node, then:(slot:Slot<N>)=>void) {
+  const slot = node.slots.find(s => s.name === named)
+  if (isDef(slot) && isDef(slot.connection)) {
+    then(slot as ConnectedSlot<N>);
+  }
+}
+
+export interface Positioned {
+  x: number
+  y: number
+}
+
+export interface Node extends Rated<NodeType>, Positioned {
   slots: Slot[];
 }
 
-export interface Buffer extends Rated<BufferType> {
+export interface Buffer extends Rated<BufferType>, Positioned {
   in: Node;
   out: Node;
 }
@@ -37,20 +61,21 @@ export type ModelMap = {
   [NodeType]: Node,
   [BufferType]: Buffer,
 }
-export type ModelMapArray = {
-}
 
 // export type ModelTypes = ModelMap[keyof ModelMap]
 
 export type ModelType<T extends ModelTypeString> = ModelMap[T]
 
 export class ModelCollection {
-  private _models: Model<ModelTypeString>[] = []
+  private _models: Tracked<Model<ModelTypeString>>[] = []
 
-  private _byType:{[K in keyof ModelMap]?: ModelMap[K][]} = {}
+  private _byType:{[K in keyof ModelMap]?: Tracked<ModelMap[K]>[]} = {}
 
-  push(model:Omit<Model<ModelTypeString>, "id">):number {
-    type NewModel = Model<(typeof model)["type"]>
+  push(model:Model<ModelTypeString>):number {
+    if (isDef(model.id)) {
+      throw new Error(`[ModelCollection.push] can't push model with an existing id! was probably already pushed here or elsewhere ${model.id} name: ${model.name}`);
+    }
+    type NewModel = Tracked<Model<(typeof model)["type"]>>
     const mTmp = model as any
     mTmp.id = this._models.length
     const m = mTmp as NewModel
@@ -62,15 +87,15 @@ export class ModelCollection {
     return m.id
   }
 
-  ofType<T extends ModelTypeString>(type:T):ModelType<T>[] {
+  ofType<T extends ModelTypeString>(type:T):Tracked<ModelType<T>>[] {
     if (type in this._byType && isDef(this._byType[type])) {
-      return this._byType[type] as ModelType<T>[]
+      return this._byType[type] as Tracked<ModelType<T>>[]
     }
     return []
   }
 
-  get<T extends ModelTypeString>(type:T, id:number):ModelType<T> {
-    const model = this._models[id] as ModelType<T>|undefined
+  get<T extends ModelTypeString>(type:T, id:number):Tracked<ModelType<T>> {
+    const model = this._models[id] as Tracked<ModelType<T>>|undefined
     if (!isDef(model)) {
       throw new Error(`[ModelCollection] no model found with id ${id}. max id: ${this._models.length}`);
     }
@@ -78,5 +103,9 @@ export class ModelCollection {
       throw new Error(`[ModelCollection] unexpected model type. expected ${type}, but found ${type}`);
     }
     return model
+  }
+
+  has(model:Model<ModelTypeString>):boolean {
+    return isDef(model.id) && model.id < this._models.length;
   }
 }

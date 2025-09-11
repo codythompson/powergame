@@ -1,22 +1,55 @@
-import { Application, Container, Graphics, Rectangle } from "pixi.js";
+import { Application, Container, Rectangle } from "pixi.js";
 
 import "./assets";
-import nodeContext from "./graphics/node";
+import makeViewCollection from "./views";
+import { Node, SlotNames } from "./models"
 import { isDef } from "./types/guards";
-import { makeWire } from "./graphics/wire";
 
 (async () => {
-
-  // TODO - use the new controller/view stuff or something?
-
   // Create a new application
   const app = new Application();
 
   // Initialize the application
-  await app.init({ background: "#021", resizeTo: window });
+  await app.init({ background: "#210", resizeTo: window });
 
   // Append the application canvas to the document body
   document.getElementById("pixi-container")!.appendChild(app.canvas);
+
+  const bg = new Container({boundsArea: new Rectangle(0,0,1920,1080), eventMode: "static", interactive:true, hitArea: new Rectangle(0,0,1920, 1080)})
+  app.stage.addChild(bg);
+
+  const views = makeViewCollection(bg);
+
+  let lastNode:Node|undefined = undefined
+  bg.on("click", e => {
+    const newNode:Node = {
+      type: "Node",
+      slots: [
+        {
+          type: "Slot",
+          name: SlotNames.out,
+          rate: 1,
+          connection: undefined,
+        },
+        {
+          type: "Slot",
+          name: SlotNames.in,
+          rate: -1,
+          connection: lastNode,
+        }
+      ],
+      rate: 1,
+      x: e.x,
+      y: e.y
+    };
+    if (isDef(lastNode)) {
+      const slot = lastNode.slots.find(s => s.name === SlotNames.out)!;
+      slot.connection = newNode
+    }
+    views.push(newNode);
+    lastNode = newNode;
+  });
+})();
 
   // Load the bunny texture
   // const texture = await Assets.load("/assets/bunny.png");
@@ -33,11 +66,11 @@ import { makeWire } from "./graphics/wire";
   // // Add the bunny to the stage
   // app.stage.addChild(bunny);
 
-  const landContainer = new Container({
-    hitArea: new Rectangle(0, 0, 1000, 1000),
-    eventMode: "static",
-  });
-  app.stage.addChild(landContainer);
+  // const landContainer = new Container({
+  //   hitArea: new Rectangle(0, 0, 1000, 1000),
+  //   eventMode: "static",
+  // });
+  // app.stage.addChild(landContainer);
 
   // const nodeGraphic = makeNodeGraphic(128, 268);
   // nodeGraphic.x = 96;
@@ -53,23 +86,23 @@ import { makeWire } from "./graphics/wire";
   // });
   // landContainer.addChild(tmpText);
 
-  let lastMade: Graphics | undefined = undefined;
+  // let lastMade: Graphics | undefined = undefined;
 
-  landContainer.on("click", (e) => {
-    const newNode = new Graphics(nodeContext);
-    newNode.x = e.x;
-    newNode.y = e.y;
-    newNode.tint = 0x333011;
-    landContainer.addChild(newNode);
+  // landContainer.on("click", (e) => {
+    // const newNode = new Graphics(nodeContext);
+    // newNode.x = e.x;
+    // newNode.y = e.y;
+    // newNode.tint = 0x333011;
+    // landContainer.addChild(newNode);
 
-    if (isDef(lastMade)) {
-      const newWire = makeWire(lastMade.x, lastMade.y, newNode.x, newNode.y);
-      newWire.tint = 0x888822;
-      landContainer.addChild(newWire);
-    }
+    // if (isDef(lastMade)) {
+    //   const newWire = makeWire(lastMade.x, lastMade.y, newNode.x, newNode.y);
+    //   newWire.tint = 0x888822;
+    //   landContainer.addChild(newWire);
+    // }
 
-    lastMade = newNode;
-  });
+    // lastMade = newNode;
+  // });
 
   // Listen for animate update
   // app.ticker.add((time) => {
@@ -78,4 +111,3 @@ import { makeWire } from "./graphics/wire";
   //   // * Creates frame-independent transformation *
   //   bunny.rotation += 0.1 * time.deltaTime;
   // });
-})();
