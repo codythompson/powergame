@@ -6,6 +6,9 @@ import { isDef } from "./types/guards";
 import { makeWire } from "./graphics/wire";
 
 (async () => {
+
+  // TODO - use the new controller/view stuff or something?
+
   // Create a new application
   const app = new Application();
 

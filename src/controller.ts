@@ -1,3 +1,8 @@
+import { ViewCollection } from "./view";
+
 export class Controller {
-  nodes: { node: Node }[] = [];
+  constructor(readonly views:ViewCollection) {
+  }
+
+  // TODO use it?
 }
