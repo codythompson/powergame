@@ -9,16 +9,14 @@ export function isTyped<C extends Typed<T>, T extends string>(value:any, type:T)
   return !isObjWithProp("type", "string", value) && value.type === type
 }
 
-export interface Component<T extends string> extends Typed<T> {
-  // maybe add generic properties?
-}
-
-export interface Model<T extends string> extends Typed<T> {
-  type: T
-  name?: string
-  id: string
-
-  components: Record<string, Component<string>>
-
-  // children: Model<string>[]
-}
+// export function enumish<K extends string>(...keys:K[]):Enumish<K> {
+//     return Object.fromEntries(keys.map(k => [k,k])) as Record<K,K>
+// }
+// export type Enumish<K extends string> = Record<K,K>;
+// export function enumerate<K extends string>(enumish:Enumish<K>):K[] {
+//     return Object.values(enumish)
+// }
+// export function isEnumishGuard<K extends string>(enumish:Enumish<K>):(value:string) => value is keyof Enumish<K> {
+//     return (value:string):value is K => enumerate(enumish).indexOf(value as K) >= 0
+// }
+// export type EnumishK<E extends Enumish<string>, K extends keyof E> = E[K]
