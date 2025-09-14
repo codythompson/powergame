@@ -1,15 +1,27 @@
-import { assertDef, isDef, isNum } from "./types/guards"
-import { Typed } from "./types/typed"
+import { isDef } from "./types/guards";
+import { isTyped, Tracked, Typed } from "./types/typed";
 
-export interface Model<T extends string> extends Typed<T> {
-  readonly type: T
-  name: string
+export const SlotType = "Slot"
+export type SlotType = typeof SlotType
+export const NodeType = "Node"
+export type NodeType = typeof NodeType
+export const BufferType = "Buffer"
+export type BufferType = typeof BufferType
+
+export type ModelTypeString = SlotType|NodeType|BufferType
+
+export interface Model<T extends ModelTypeString> extends Typed<T> {
   id?: number
+
+  parent: number|undefined
+  connectedTo: number|undefined
+
+  x: number
+  y: number
 }
 
-export interface Connector<T extends string = string> extends Model<T> {
-  base: "connector"
-  readonly maxRate: number
+export interface Connector<T extends string = string> extends Model<T, "connector"> {
+  // readonly maxRate: number
   x: number
   y: number
 
@@ -17,10 +29,10 @@ export interface Connector<T extends string = string> extends Model<T> {
   connectedTo: number|undefined
 
   /// volume in or out for next tick
-  volume: number
+  // volume: number
 }
 
-export interface System<T extends string = string> extends Model<T> { }
+export interface System<T extends string = string> extends Model<T, "system"> { }
 
 export interface ConnectorNode {
   readonly name:string
@@ -44,7 +56,7 @@ export class ModelCollection {
   private _connectors:Connector[] = []
   private _byParentId:{ [nodeId:number]: Connector[] } = {}
 
-  push(node:System, connectors:Connector[] = []):number {
+  pushSystem(node:System, connectors:Connector[] = []):number {
     if (isDef(node.id)) {
       throw new Error(`[ModelCollection.push] cannot re-push system. id:${node.id} name:${node.name}`)
     }
@@ -60,14 +72,6 @@ export class ModelCollection {
     return node.id
   }
 
-  connect(a:Connector, b:Connector) {
-    // TODO compatibility check???
-    assertDef(a.id)
-    assertDef(b.id)
-    a.connectedTo = b.id
-    b.connectedTo = a.id
-  }
-
   pushConnector(parent:System|number, connector:Connector):number {
     if (!isNum(parent)) {
       parent = assertDef(parent.id);
@@ -77,6 +81,15 @@ export class ModelCollection {
     }
     connector.parent = parent;
     connector.id = this._connectors.push(connector)-1;
+    return connector.id;
+  }
+
+  connect(a:Connector, b:Connector) {
+    // TODO compatibility check???
+    assertDef(a.id)
+    assertDef(b.id)
+    a.connectedTo = b.id
+    b.connectedTo = a.id
   }
 
   getSystem(id:number = Infinity):System|undefined {
@@ -87,7 +100,18 @@ export class ModelCollection {
     return id < this._connectors.length ? this._connectors[id] : undefined
   }
 
-  findByName<T extends Connector|ConnectorNode>(connectors:T[], name:string):T|undefined {
+  contains(model:Model<string>):boolean {
+    switch (model.base) {
+      case "connector":
+        return this.getConnector(model.id) !== undefined;
+      case "system":
+        return this.getConnector(model.id) !== undefined;
+      default:
+        throw new Error(`[ModelCollection.contains] unknown model base type: ${model.base}. id: ${model.id} name: ${model.name}`);
+    }
+  }
+
+  static findByName<T extends Connector|ConnectorNode>(connectors:T[], name:string):T|undefined {
     return connectors.find(c => c.name === name)
   }
 
@@ -124,7 +148,7 @@ export class ModelCollection {
       system,
       connectors, 
       toConnected: (name:string) => {
-        return this.findByName(connectors, name)
+        return ModelCollection.findByName(connectors, name)
       }
     }
   }
@@ -237,4 +261,18 @@ export class ModelCollection {
  *     }
  * 
  * future: templates???
+ */
+
+/* UPDATE: a few days later
+ * connectors are just subsystems
+ * 
+ * its all just nodes with refs to parents or siblings
+ * sigh
+ * components/props will have the details on things like maxrate
+ * components should have types, not necessarily nodes
+ * 
+ * RENAMING Node to Entity 
+ * Node will have graph nav. stuff and not be serializable
+ * 
+ * see entity.ts file!!!!
  */

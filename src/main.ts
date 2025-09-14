@@ -2,7 +2,7 @@ import { Application, Container, Rectangle } from "pixi.js";
 
 import "./assets";
 import makeViewCollection from "./views";
-import { Node, SlotNames } from "./models.old"
+import { Node, SlotNames } from "./models.older"
 import { isDef } from "./types/guards";
 
 (async () => {

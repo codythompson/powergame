@@ -23,3 +23,5 @@ export function isTyped<C extends Typed<T>, T extends string>(value:any, type:T)
 
 export type Tracked<T extends object> = T & { id:number };
 export type UnTracked<T extends object> = T & { id:undefined }
+
+export type ModelAtlas<
