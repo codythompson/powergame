@@ -1,9 +1,7 @@
 import { Application, Container, Rectangle } from "pixi.js";
 
 import "./assets";
-import makeViewCollection from "./views";
-import { Node, SlotNames } from "./models.older";
-import { isDef } from "./types/guards";
+import { makeGame } from "./entities";
 
 (async () => {
   // Create a new application
@@ -23,36 +21,44 @@ import { isDef } from "./types/guards";
   });
   app.stage.addChild(bg);
 
-  const views = makeViewCollection(bg);
+  const game = makeGame(bg);
 
-  let lastNode: Node | undefined = undefined;
+  // let lastNode: Node | undefined = undefined;
   bg.on("click", (e) => {
-    const newNode: Node = {
-      type: "Node",
-      slots: [
-        {
-          type: "Slot",
-          name: SlotNames.out,
-          rate: 1,
-          connection: undefined,
-        },
-        {
-          type: "Slot",
-          name: SlotNames.in,
-          rate: -1,
-          connection: lastNode,
-        },
-      ],
-      rate: 1,
+    game.makeEntity("system", {
+      name: "a" + e.x,
       x: e.x,
       y: e.y,
-    };
-    if (isDef(lastNode)) {
-      const slot = lastNode.slots.find((s) => s.name === SlotNames.out)!;
-      slot.connection = newNode;
-    }
-    views.push(newNode);
-    lastNode = newNode;
+      w: 100,
+      h: 100,
+    });
+
+    //   const newNode: Node = {
+    //     type: "Node",
+    //     slots: [
+    //       {
+    //         type: "Slot",
+    //         name: SlotNames.out,
+    //         rate: 1,
+    //         connection: undefined,
+    //       },
+    //       {
+    //         type: "Slot",
+    //         name: SlotNames.in,
+    //         rate: -1,
+    //         connection: lastNode,
+    //       },
+    //     ],
+    //     rate: 1,
+    //     x: e.x,
+    //     y: e.y,
+    //   };
+    //   if (isDef(lastNode)) {
+    //     const slot = lastNode.slots.find((s) => s.name === SlotNames.out)!;
+    //     slot.connection = newNode;
+    //   }
+    //   views.push(newNode);
+    //   lastNode = newNode;
   });
 })();
 

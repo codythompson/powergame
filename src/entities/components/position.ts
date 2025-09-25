@@ -1,13 +1,11 @@
 import { Typed } from "../../types/typed";
 
-export type PositionType = "position";
-export interface Position extends Typed<PositionType> {
+export interface Position extends Typed<"position"> {
   x: number;
   y: number;
 }
 
-export type DimensionType = "dimension";
-export interface Dimension extends Typed<DimensionType> {
+export interface Dimension extends Typed<"dimension"> {
   w: number;
   h: number;
 }

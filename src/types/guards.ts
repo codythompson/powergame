@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NullNotAllowedError, UnexpectedUndefinedError } from "./errors";
 
 export type Prim = string | number | boolean;
@@ -49,6 +50,7 @@ export function isObj<T extends Record<string, any> = Record<string, any>>(
   return typeof value === "object" && !isArr(value);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function isFunc(value: any): value is Function {
   return typeof value === "function";
 }

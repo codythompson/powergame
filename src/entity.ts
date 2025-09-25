@@ -82,6 +82,8 @@ export class EntityCollection {
   private _byParentId: Record<number, Tracked<Entity>[]> = {};
   private _nodeCache: Record<number, Node<Tracked<Entity>>> = {};
 
+  constructor(readonly container: Container) {}
+
   push(entity: Entity): number {
     if (isDef(entity.id)) {
       throw Error();
@@ -100,6 +102,9 @@ export class EntityCollection {
   pushTree({ entity, sprites, children }: EntityPushParams<Entity>): number {
     const id = this.push(entity);
     this._sprites[id] = sprites;
+    for (const sprite of Object.values(sprites)) {
+      this.container.addChild(sprite);
+    }
     if (isDef(children)) {
       this.pushTree(children);
     }
