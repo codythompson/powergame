@@ -1,13 +1,15 @@
 import { Container } from "pixi.js";
-import { EntityCollection } from "./entity";
+import { EntityCollection, Node } from "./entity";
 import {
   AllTemplateTypes,
   TemplateCollection,
   TemplateType,
+  TemplateTypeE,
   TemplateTypeP,
   TemplateTypeSet,
   TemplateTypeT,
 } from "./templates";
+import { Tracked } from "./types/typed";
 
 export class Game<
   TTS extends TemplateTypeSet<TemplateType>,
@@ -27,12 +29,13 @@ export class Game<
       TemplateTypeP<AllTemplateTypes<TTS>, T>,
       "type" | "collection"
     >,
-  ): number {
+  ): Node<Tracked<TemplateTypeE<TTS[T]>>> {
     const inflatedParams = {
       collection: this.entities,
       ...params,
     } as TemplateTypeP<AllTemplateTypes<TTS>, T>;
     const pushArgs = this.templates.makeEntity<T>(type, inflatedParams);
-    return this.entities.pushTree(pushArgs);
+    const id = this.entities.pushTree(pushArgs);
+    return this.entities.getNode(id)!;
   }
 }

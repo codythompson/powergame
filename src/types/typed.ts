@@ -5,6 +5,8 @@ export interface Typed<T extends string> {
 }
 export type GenericTyped = Typed<string>;
 
+export type UnTyped<O extends GenericTyped> = Omit<O, "type">;
+
 export function isTyped<C extends Typed<T>, T extends string>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
@@ -27,5 +29,5 @@ export type TOf<O extends Typed<string>> = O["type"];
 // }
 // export type EnumishK<E extends Enumish<string>, K extends keyof E> = E[K]
 
-export type Tracked<T extends object> = T & { id: number };
+export type Tracked<T extends { id?: number }> = T & { id: number };
 export type UnTracked<T extends object> = T & { id: undefined };

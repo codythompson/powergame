@@ -1,7 +1,11 @@
 import { Application, Container, Rectangle } from "pixi.js";
 
 import "./assets";
+import { Node } from "./entity";
 import { makeGame } from "./entities";
+import { System } from "./entities/system";
+import { isDef } from "./types/guards";
+import { Tracked } from "./types/typed";
 
 (async () => {
   // Create a new application
@@ -24,8 +28,9 @@ import { makeGame } from "./entities";
   const game = makeGame(bg);
 
   // let lastNode: Node | undefined = undefined;
+  let lastSystem: Node<Tracked<System>> | undefined = undefined;
   bg.on("click", (e) => {
-    game.makeEntity("system", {
+    const newSystem = game.makeEntity("system", {
       name: "a" + e.x,
       x: e.x,
       y: e.y,
@@ -33,6 +38,11 @@ import { makeGame } from "./entities";
       h: 100,
     });
 
+    if (isDef(lastSystem)) {
+      // const connection = game.makeEntity("connection", {});
+    }
+
+    lastSystem = newSystem;
     //   const newNode: Node = {
     //     type: "Node",
     //     slots: [
@@ -58,7 +68,6 @@ import { makeGame } from "./entities";
     //     slot.connection = newNode;
     //   }
     //   views.push(newNode);
-    //   lastNode = newNode;
   });
 })();
 

@@ -1,4 +1,4 @@
-import { Typed } from "../../types/typed";
+import { Typed, UnTyped } from "../../types/typed";
 
 export interface Position extends Typed<"position"> {
   x: number;
@@ -10,4 +10,9 @@ export interface Dimension extends Typed<"dimension"> {
   h: number;
 }
 
-export type PositionTypes = Position | Dimension;
+export interface Rect
+  extends UnTyped<Position>,
+    UnTyped<Dimension>,
+    Typed<"rect"> {}
+
+export type PositionTypes = Position | Dimension | Rect;

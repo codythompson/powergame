@@ -1,18 +1,17 @@
 import { Graphics } from "pixi.js";
 import { Entity, EntityPushParams } from "../entity";
 import { TemplateFunc, TemplateParams } from "../templates";
-import { PositionTypes } from "./components/position";
+import { Rect } from "./components/position";
 import nodeContext from "../graphics/node";
+import { UnTyped } from "../types/typed";
 
 export const SystemType = "system";
-export type System = Entity<typeof SystemType, PositionTypes>;
+export type System = Entity<typeof SystemType, Rect>;
 
-export interface SystemTemplateParams extends TemplateParams<System> {
+export interface SystemTemplateParams
+  extends TemplateParams<System>,
+    UnTyped<Rect> {
   name: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
 }
 
 export type SystemTemplateType = {
@@ -36,8 +35,7 @@ export const makeSystem: TemplateFunc<SystemTemplateType> = function ({
       type: SystemType,
       name,
       components: {
-        position: { type: "position", x, y },
-        dimension: { type: "dimension", w, h },
+        position: { type: "rect", x, y, w, h },
       },
     },
     sprites: {
