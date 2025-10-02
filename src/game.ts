@@ -2,6 +2,7 @@ import { Container } from "pixi.js";
 import { EntityCollection, Node } from "./entity";
 import {
   AllTemplateTypes,
+  CustomOnly,
   TemplateCollection,
   TemplateType,
   TemplateTypeE,
@@ -25,10 +26,7 @@ export class Game<
 
   makeEntity<T extends TemplateTypeT<AllTemplateTypes<TTS>>>(
     type: T,
-    params: Omit<
-      TemplateTypeP<AllTemplateTypes<TTS>, T>,
-      "type" | "collection"
-    >,
+    params: CustomOnly<TemplateTypeP<AllTemplateTypes<TTS>, T>>,
   ): Node<Tracked<TemplateTypeE<TTS[T]>>> {
     const inflatedParams = {
       collection: this.entities,

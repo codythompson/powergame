@@ -36,6 +36,19 @@ import { Tracked } from "./types/typed";
       y: e.y,
       w: 100,
       h: 100,
+      ports: [
+        {
+          y: 64,
+          name: "a",
+        },
+        {
+          x: 64,
+          y: 64,
+          name: "b",
+          connectorType: "bee",
+          maxVolume: 20,
+        },
+      ],
     });
 
     if (isDef(lastSystem)) {

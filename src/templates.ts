@@ -7,6 +7,11 @@ export interface TemplateParams<E extends Entity<string> = Entity<string>>
   name: string;
 }
 
+export type CustomOnly<TP extends TemplateParams> = Omit<
+  TP,
+  "type" | "collection"
+>;
+
 export type TemplateFunc<
   TT extends TemplateType,
   T extends TemplateTypeT<TT> = TemplateTypeT<TT>,
@@ -24,11 +29,13 @@ export type TemplateType<
 
 // extract type string from TemplateType
 export type TemplateTypeT<TT extends TemplateType> = TT["T"];
+
 // extract entity type from TemplateType
 export type TemplateTypeE<
   TT extends TemplateType,
   T extends TemplateTypeT<TT> = TemplateTypeT<TT>,
 > = TT["E"] & Entity<T>;
+
 // extract template params type from TemplateType
 export type TemplateTypeP<
   TT extends TemplateType,

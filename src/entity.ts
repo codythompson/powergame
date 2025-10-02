@@ -35,12 +35,8 @@ export class Node<E extends Tracked<Entity>> {
     return this.entity.components;
   }
 
-  get sprites(): Record<string, PixiSprite> {
-    return this.collection.getSprites(this.id);
-  }
-
-  getSprite(name: string): PixiSprite | undefined {
-    return this.sprites[name];
+  get sprite(): PixiSprite | undefined {
+    return this.collection.getSprite(this.id);
   }
 
   get parent(): Entity | undefined {
@@ -64,21 +60,21 @@ export class Node<E extends Tracked<Entity>> {
     return this;
   }
 
-  setSprite(name: string, sprite: PixiSprite): Node<E> {
-    this.collection.setSprite(this.id, name, sprite);
+  setSprite(sprite: PixiSprite): Node<E> {
+    this.collection.setSprite(this.id, sprite);
     return this;
   }
 }
 
 export interface EntityPushParams<E extends Entity, C extends Entity = Entity> {
   entity: E;
-  sprites: Record<string, PixiSprite>;
-  children?: EntityPushParams<C>;
+  sprite?: PixiSprite;
+  children?: EntityPushParams<C>[];
 }
 
 export class EntityCollection {
   private _entities: Entity[] = [];
-  private _sprites: Record<number, Record<string, PixiSprite>> = {};
+  private _sprites: Record<number, PixiSprite> = {};
   private _byParentId: Record<number, Tracked<Entity>[]> = {};
   private _nodeCache: Record<number, Node<Tracked<Entity>>> = {};
 
@@ -99,14 +95,16 @@ export class EntityCollection {
     return id;
   }
 
-  pushTree({ entity, sprites, children }: EntityPushParams<Entity>): number {
+  pushTree(params: EntityPushParams<Entity>): number {
+    const { entity, sprite, children = [] } = params;
     const id = this.push(entity);
-    this._sprites[id] = sprites;
-    for (const sprite of Object.values(sprites)) {
+    if (isDef(sprite)) {
+      this._sprites[id] = sprite;
       this.container.addChild(sprite);
     }
-    if (isDef(children)) {
-      this.pushTree(children);
+    for (const child of children) {
+      const childId = this.pushTree(child);
+      this.setParent(this.get(childId)!, id);
     }
     return id;
   }
@@ -135,14 +133,10 @@ export class EntityCollection {
     return node;
   }
 
-  getSprites(entity: Entity | number): Record<string, PixiSprite> {
+  getSprite(entity: Entity | number): PixiSprite | undefined {
     const id = this.assert(entity).id;
     if (!(id in this._entities)) {
       throw new Error(`${id} not in this collection`);
-    }
-    if (!(id in this._sprites)) {
-      // mutating inside getter! is super convenient
-      this._sprites[id] = {};
     }
     return this._sprites[id];
   }
@@ -165,6 +159,23 @@ export class EntityCollection {
       throw new Error("setparent unknown parent");
     }
     e.parent = newParent;
+    const sprite = this.getSprite(e);
+
+    // re-parent the sprite to first ancestor
+    if (!isDef(sprite)) {
+      return;
+    }
+    sprite.removeFromParent();
+    let spriteParent = this.getNode(newParent);
+    let container: PixiSprite | undefined = undefined;
+    while (isDef(spriteParent)) {
+      // find the first ancestor with a defined sprite
+      container = spriteParent.sprite;
+      spriteParent = isDef(container) ? undefined : spriteParent.toParent();
+    }
+    // add the sprite as a child of either the ancestor sprite we found,
+    // or the base container if not found
+    (container ?? this.container).addChild(sprite);
   }
 
   connect(a: Entity | number, b: Entity | number) {
@@ -174,11 +185,8 @@ export class EntityCollection {
     bE.connected = aE.id;
   }
 
-  setSprite(
-    forEntity: Entity | number,
-    spriteName: string,
-    sprite: PixiSprite,
-  ): void {
-    this.getSprites(forEntity)[spriteName] = sprite;
+  setSprite(forEntity: Entity | number, sprite: PixiSprite): void {
+    const e = this.assert(forEntity);
+    this._sprites[e.id] = sprite;
   }
 }

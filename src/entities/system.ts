@@ -1,9 +1,10 @@
 import { Graphics } from "pixi.js";
 import { Entity, EntityPushParams } from "../entity";
-import { TemplateFunc, TemplateParams } from "../templates";
+import { CustomOnly, TemplateFunc, TemplateParams } from "../templates";
 import { Rect } from "./components/position";
 import nodeContext from "../graphics/node";
 import { UnTyped } from "../types/typed";
+import { makePort, PortTemplateParams, PortType } from "./port";
 
 export const SystemType = "system";
 export type System = Entity<typeof SystemType, Rect>;
@@ -11,7 +12,7 @@ export type System = Entity<typeof SystemType, Rect>;
 export interface SystemTemplateParams
   extends TemplateParams<System>,
     UnTyped<Rect> {
-  name: string;
+  ports?: CustomOnly<PortTemplateParams>[];
 }
 
 export type SystemTemplateType = {
@@ -26,6 +27,8 @@ export const makeSystem: TemplateFunc<SystemTemplateType> = function ({
   y,
   w,
   h,
+  ports = [],
+  collection,
 }: SystemTemplateParams): EntityPushParams<System> {
   const bg = new Graphics(nodeContext);
   bg.x = x;
@@ -38,9 +41,7 @@ export const makeSystem: TemplateFunc<SystemTemplateType> = function ({
         position: { type: "rect", x, y, w, h },
       },
     },
-    sprites: {
-      bg,
-    },
-    // children
+    sprite: bg,
+    children: ports.map((p) => makePort({ ...p, collection, type: PortType })),
   };
 };
