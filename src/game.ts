@@ -14,7 +14,11 @@ export class Game<
   TTS extends TemplateTypeSet<AllTT, AllT>,
   AllTT extends TemplateType<AllT>,
   AllT extends string,
-  TS extends TemplateCollection<TTS, AllTT, AllT> = TemplateCollection<TTS, AllTT, AllT>,
+  TS extends TemplateCollection<TTS, AllTT, AllT> = TemplateCollection<
+    TTS,
+    AllTT,
+    AllT
+  >,
 > {
   entities: EntityCollection;
   templates: TS;
