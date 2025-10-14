@@ -52,7 +52,9 @@ import { Tracked } from "./types/typed";
     });
 
     if (isDef(lastSystem)) {
-      // const connection = game.makeEntity("connection", {});
+      // game.makeEntity("wire", {
+      //   portAId = game.entities.getNode(lastSystem.id).???
+      // });
     }
 
     lastSystem = newSystem;

@@ -1,4 +1,4 @@
-import { Typed } from "../types/typed";
+import { Typed } from "../../types/typed";
 
 export const PortSpecType = "port-spec";
 

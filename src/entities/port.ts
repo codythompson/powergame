@@ -3,7 +3,7 @@ import { Entity } from "../entity";
 import { TemplateFunc, TemplateParams } from "../templates";
 import { UnTyped } from "../types/typed";
 import { Rect } from "./components/position";
-import { PortSpec, PortSpecType } from "./portSpec";
+import { PortSpec, PortSpecType } from "./components/portSpec";
 import nodeContext from "../graphics/node";
 
 export const PortType = "port";

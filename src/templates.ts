@@ -93,7 +93,9 @@ export abstract class BaseTemplate<
   T extends TemplateTypeT<TT> = TemplateTypeT<TT>,
   C extends TemplateTypeT<CC> = TemplateTypeT<CC>,
 > implements Template<TT, CC, T, C> {
-  abstract makeEntity(params:TemplateTypeP<TT,T>): TemplateTypeE<TT,T>;
+  makeEntity({type, name, collection}:TemplateTypeP<TT,T>): TemplateTypeE<TT,T> {
+    return { type, name, collection, components: {} };
+  }
   makeSprite(_: TemplateTypeP<TT,T>):PixiSprite|undefined {
     return undefined;
   }
