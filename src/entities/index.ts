@@ -1,21 +1,28 @@
 import { Container } from "pixi.js";
 import { Game } from "../game";
 import { TemplateCollection } from "../templates";
-import { makeSystem, SystemTemplateType } from "./system";
+import { SystemTemplate, SystemTemplateType } from "./system";
+import { makePort, PortTemplateType } from "./port";
 
 export type DefaultTemplateTypeSet = {
   system: SystemTemplateType;
+  port: PortTemplateType;
 };
+
+export type DefaultTemplateTypeStrings = keyof DefaultTemplateTypeSet;
+
 export type DefaultTemplateTypes =
-  DefaultTemplateTypeSet[keyof DefaultTemplateTypeSet];
+  DefaultTemplateTypeSet[DefaultTemplateTypeStrings];
+
 
 const templateStore = {
-  system: makeSystem,
+  system: new SystemTemplate(),
+  port: makePort,
 };
-const templateCollection = new TemplateCollection<DefaultTemplateTypeSet>(
-  templateStore,
+const templateCollection = new TemplateCollection<DefaultTemplateTypeSet, DefaultTemplateTypes, DefaultTemplateTypeStrings>(
+  templateStore
 );
 
-export function makeGame(container: Container): Game<DefaultTemplateTypeSet> {
+export function makeGame(container: Container): Game<DefaultTemplateTypeSet,  DefaultTemplateTypes, DefaultTemplateTypeStrings> {
   return new Game(container, templateCollection);
 }
