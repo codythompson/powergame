@@ -4,7 +4,13 @@ import { BaseTemplate, CustomOnly, TemplateParams } from "../templates";
 import { Rect } from "./components/position";
 import nodeContext from "../graphics/node";
 import { UnTyped } from "../types/typed";
-import { makePort, Port, PortTemplateParams, PortTemplateType, PortType } from "./port";
+import {
+  makePort,
+  Port,
+  PortTemplateParams,
+  PortTemplateType,
+  PortType,
+} from "./port";
 
 export const SystemType = "system";
 export type System = Entity<typeof SystemType, Rect>;
@@ -21,19 +27,25 @@ export type SystemTemplateType = {
   P: SystemTemplateParams;
 };
 
-export class SystemTemplate extends BaseTemplate<SystemTemplateType, PortTemplateType> {
-  makeSprite({x,y}: SystemTemplateParams): PixiSprite {
+export class SystemTemplate extends BaseTemplate<
+  SystemTemplateType,
+  PortTemplateType
+> {
+  makeSprite({ x, y }: SystemTemplateParams): PixiSprite {
     const bg = new Graphics(nodeContext);
     bg.x = x;
     bg.y = y;
     return bg;
   }
 
-  makeChildren({ports = [], collection}: SystemTemplateParams): EntityPushParams<Port>[] {
+  makeChildren({
+    ports = [],
+    collection,
+  }: SystemTemplateParams): EntityPushParams<Port>[] {
     return ports.map((p) => makePort({ ...p, collection, type: PortType }));
   }
 
-  makeEntity({name, x, y, w, h}:SystemTemplateParams): System {
+  makeEntity({ name, x, y, w, h }: SystemTemplateParams): System {
     return {
       type: SystemType,
       name,
@@ -42,4 +54,4 @@ export class SystemTemplate extends BaseTemplate<SystemTemplateType, PortTemplat
       },
     };
   }
-};
+}
