@@ -41,6 +41,4 @@ export class WireTemplate extends BaseTemplate<
     }
     return makeWire(pAPos.x, pAPos.y, pBPos.x, pBPos.y);
   }
-
-  // TODO setup ref componenents in makeEnt
 }
