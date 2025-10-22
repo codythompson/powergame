@@ -1,6 +1,6 @@
 import { Entity, PixiSprite } from "../entity";
-import { BaseTemplate, CustomOnly, TemplateParams, TemplateTypeE, TemplateTypeP } from "../templates";
-import { Port, PortTemplateParams, PortTemplateType } from "./port";
+import { BaseTemplate, TemplateParams } from "../templates";
+import { Port, PortTemplateType } from "./port";
 import { PortSpec } from "./components/portSpec";
 import { makeWire } from "../graphics/wire";
 import { isDef } from "../types/guards";
