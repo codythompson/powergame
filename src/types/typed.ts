@@ -29,5 +29,5 @@ export type TOf<O extends Typed<string>> = O["type"];
 // }
 // export type EnumishK<E extends Enumish<string>, K extends keyof E> = E[K]
 
-export type Tracked<T extends { id?: number }> = T & { id: number };
+export type Tracked<T extends { id?: number }> = T & { readonly id: number };
 export type UnTracked<T extends object> = T & { id: undefined };

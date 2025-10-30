@@ -1,13 +1,14 @@
 import { Container, Sprite } from "pixi.js";
 import { isDef, isNum, isObj } from "./types/guards";
 import { Tracked, Typed } from "./types/typed";
+import { Eventer } from "./eventer";
 
 export interface Entity<
   T extends string = string,
   C extends Typed<string> = Typed<string>,
 > extends Typed<T> {
   id?: number;
-  name: string;
+  readonly name: string;
 
   parent?: number;
   connected?: number;
@@ -15,9 +16,11 @@ export interface Entity<
   components: Record<string, C>;
 }
 
+export type TEntity = Tracked<Entity>;
+
 export type PixiSprite = Sprite | Container;
 
-export class Node<E extends Tracked<Entity>> {
+export class Node<E extends TEntity> {
   constructor(
     readonly collection: EntityCollection,
     readonly entity: E,
@@ -47,11 +50,11 @@ export class Node<E extends Tracked<Entity>> {
     return this.collection.get(this.entity.connected);
   }
 
-  toParent(): Node<Tracked<Entity>> | undefined {
+  toParent(): Node<TEntity> | undefined {
     return this.collection.getNode(this.entity.parent);
   }
 
-  toConnected(): Node<Tracked<Entity>> | undefined {
+  toConnected(): Node<TEntity> | undefined {
     return this.collection.getNode(this.entity.connected);
   }
 
@@ -73,10 +76,18 @@ export interface EntityPushParams<E extends Entity, C extends Entity = Entity> {
 }
 
 export class EntityCollection {
+  public readonly eventer = new Eventer<{
+    "pushed": {entity: TEntity},
+    "parentSet": {parent: TEntity, child:TEntity},
+    "connected": {a: TEntity, b: TEntity},
+    "spriteSet": {entity: TEntity, sprite:Container},
+  }>("entity");
+
   private _entities: Entity[] = [];
   private _sprites: Record<number, PixiSprite> = {};
-  private _byParentId: Record<number, Tracked<Entity>[]> = {};
-  private _nodeCache: Record<number, Node<Tracked<Entity>>> = {};
+  private _byParentId: Record<number, TEntity[]> = {};
+  private _byName: Record<string, number[]> = {};
+  private _nodeCache: Record<number, Node<TEntity>> = {};
 
   constructor(readonly container: Container) {}
 
@@ -90,8 +101,13 @@ export class EntityCollection {
       if (!(entity.parent in this._byParentId)) {
         this._byParentId[entity.parent] = [];
       }
-      this._byParentId[entity.parent].push(entity as Tracked<Entity>);
+      this._byParentId[entity.parent].push(entity as TEntity);
     }
+    if (!(entity.name in this._byName)) {
+      this._byName[entity.name] = [];
+    }
+    this._byName[entity.name].push(entity.id)
+    this.eventer.emit("pushed", {entity: entity as TEntity})
     return id;
   }
 
@@ -176,6 +192,7 @@ export class EntityCollection {
     // add the sprite as a child of either the ancestor sprite we found,
     // or the base container if not found
     (container ?? this.container).addChild(sprite);
+    this.eventer.emit("parentSet", {parent: this.assert(e.parent), child: this.assert(entity)})
   }
 
   connect(a: Entity | number, b: Entity | number) {
@@ -188,5 +205,11 @@ export class EntityCollection {
   setSprite(forEntity: Entity | number, sprite: PixiSprite): void {
     const e = this.assert(forEntity);
     this._sprites[e.id] = sprite;
+    this.eventer.emit("spriteSet", {entity:e, sprite})
+  }
+
+  getByName<E extends Entity = Entity>(name:string):Tracked<E>[] {
+    var ids = this._byName[name] ?? [];
+    return ids.map(id => this.assert(id))
   }
 }
